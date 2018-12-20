@@ -16,17 +16,19 @@ select the starting year (drop down of options included in the database) and ter
 
 select ending year and term
 
-enter keywords using "and" "or" operators 
+reveal table of courses that are in the specified range of time
 
-reveal table of courses where the keywords or combination of keywords are present in any of the course, nested session fields, or nested assessment fields
+	Table of course results should have sort and filter functionality for "Course name", "Year", "Term", "Credits", "Faculty Tags", "Course Instructor(s)", and "Teaching Assistants" columns
+	
+	offer option to enter keywords using "and" "or" operators as a basis to further filter courses
+	
+	where the keywords or combination of keywords are present in any of the course, nested session, or nested assessment fields
 
 	keywords should be highlighted where they occur in course fields
 	
-	Table of course results should have sort and filter functionality for "Course name", "Year", "Term", "Credits", "Faculty Tags", "Course Instructor(s)", and "Teaching Assistants" columns
-
 	users can download a csv or pdf of final results
 	
-	after course filters are selected users can select to reveal the sessions and assessments that containing any of the keywords
+	after course filters are selected users can select to reveal the sessions and assessments that contain any of the keywords
 
 reveal a table of sessions where the keywords or combination of keywords are present in any session fields
 
