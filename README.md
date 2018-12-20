@@ -7,18 +7,43 @@
 * A readme that lays out how the code is organized
 * A config file that has details of the database etc.
 
-## Search a database of information about each lecture, lab, and seminar taught in a given year of our program
+## Search a database of information about lectures, labs, seminars, and assessments nested in courses based on a user provided time frame
+## produce results as interactive tables (sort and filter functionality for specified columns) 
 
 [https://xxxx.pharmacy.ualberta.ca](http://xxxx.pharmacy.ualberta.ca) search syllabus information for content in the curriculum
 
-select the academic year you want to search within
+select the starting year (drop down of options included in the database) and term (Fall, Winter, or Spring/Summer)
 
-select which type of data you want to search - course, session (lectures, labs, and seminars), or assessments
+select ending year and term
 
-enter keywords using "and" "or" operators to reveal courses or sessions in the fall, winter, and spring/summer sessions that contain the information you are looking for
+enter keywords using "and" "or" operators 
 
-download a csv or print off search results
+reveal table of courses where the keywords or combination of keywords are present in any of the course, nested session fields, or nested assessment fields
 
+	keywords should be highlighted where they occur in course fields
+	
+	Table of course results should have sort and filter functionality for "Course name", "Year", "Term", "Credits", "Faculty Tags", "Course Instructor(s)", and "Teaching Assistants" columns
+
+	users can download a csv or pdf of final results
+	
+	after course filters are selected users can select to reveal the sessions and assessments that containing any of the keywords
+
+reveal a table of sessions where the keywords or combination of keywords are present in any session fields
+
+	keywords should be highlighted where they occur in session fields
+	
+	Table of session results should have sort and filter functionality for "Course name", "Type", "Date", "Length", "Course Instructor", "Lecturer", "Teaching Strategies", and "Delivery Mode" columns
+
+	users can download a csv or pdf of final results
+
+reveal a table of assessments where the keywords or combination of keywords are present in any assessment fields
+
+	keywords should be highlighted where they occur in session fields
+	
+	Table of sessions results should have sort and filter functionality for "Course name", "Course Instructor", "Type", "Exam Format", "Weight", "Cumulative", "Teaching Strategies", and "Date" columns
+
+	users can download a csv or pdf of final results	
+	
 ## Main Parts
 
 1. [update_dbs.py](scrips/update_dbs.py) will take three CSVs with the following fields and update the database.
