@@ -52,54 +52,57 @@ reveal a table of assessments where the keywords or combination of keywords are 
 
 Course CSV:
 
-	Short Name: course short name
-	Full Name: course full name
+	Short Name: course short name (unique course id common in all three files)
+	Full Name: course full name (unique course id common in all three files)
+	Year: numeric
 	Term: Fall, Winter, Spring, or Summer
-	Faculty: faculty where course is listed
-	Course Types: comma separated tags for courses (e.g. program the course is in, year of program, category of content)
+	Faculty: ignore
+	Course Types: comma separated course tags (e.g. program the course is in (BScPharm, PharmD, PPPharmD), year of program (1st, 2nd, 3rd), category of course content (pharm sci, practice skills, etc.))
 	Credits: number of course credits
-	Instructors: comma separated list of instructor names
+	Instructors: comma separated list of instructor names (names can contain special characters for accents that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
 	TAs: comma separated list of course TAs
 	Assessment: number of graded assessments
 	Session count: number of sessions (lectures, labs, seminars)
-	Course outcomes: all: multiple columns for each course outcome listed for a course
+	Course outcomes: all: multiple columns for each instructor written course outcome attached to a course (output could produce separate rows for each outcome if getting results in one column is difficult) 
 
 Session CSV:
 
-	Short Name: course short name
-	Full Name: course full name
-	Faculty: faculty where course is listed
-	Course Types: comma separated tags for courses (e.g. program the course is in, year of program, category of content)
-	Instructors: comma separated list of instructor names
-	TAs: comma separated list of course TAs
+	Short Name: course short name (unique course id common in all three files)
+	Full Name: course full name (unique course id common in all three files)
+	Faculty: ignore
+	Category: same as data in course file - comma separated course tags (e.g. program the course is in (BScPharm, PharmD, PPPharmD), year of program (1st, 2nd, 3rd), category of course content (pharm sci, practice skills, etc.))
+	Instructors: same as data in course file - repeated for each session with a common Short or Full name - comma separated list of instructor names (names can contain special characters for accents, etc that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
+	TAs: same as data in course file - repeated for each session with a common Short or Full name - comma separated list of course TAs
 	Session title: title of lecture lab or seminar
-	Section: label for lecture, lab or seminar section e.g. A1, B2
+	Section: ignore
 	Location: room location
-	Guest teacher: names of guest lecturers
-	Type: Lec, Lab, Seminar
-	Length: session length
-	Date: date session occurs
+	Guest teacher: name(s) of guest lecturers (names can contain special characters for accents, etc that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
+	Type: session type Lec (lecture), Lab, Seminar
+	Length: session length in mins
+	Date: date session occurs (this data is very error prone - the dates will always be in the right sequence but the actual dates are not reliable. use the Year and Term fields as the initial basis to sort results, then sort by this Date field).
 	Teaching strategies: comma separated list of teaching strategies employed
 	Instruction type: face-to-face or distance
+	topics: comma separated list of topics covered in the session
 	Specific objectives: comma separated list of session learning outcomes
-	Course outcomes: all: multiple columns for each course outcome listed for a course
+	Course outcomes: all: multiple columns for each course outcome attached to this sessions
 	
 Assessment CSV:
 
-	Short Name: course short name
-	Full Name: course full name
-	Faculty: faculty where course is listed
-	Course Types: comma separated tags for courses (e.g. program the course is in, year of program, category of content)
-	Instructors: comma separated list of instructor names
-	TAs: comma separated list of course TAs
-	Assessment title: title of lecture lab or seminar
-	Assessment type: label for type of assessment
+	Short Name: course short name (unique course id common in all three files)
+	Full Name: course full name (unique course id common in all three files)
+	Faculty: ignore
+	Category: same as data in course file - repeated for each assessment with a common Short or Full name - comma separated course tags (e.g. program the course is in (BScPharm, PharmD, PPPharmD), year of program (1st, 2nd, 3rd), category of course content (pharm sci, practice skills, etc.))
+	Instructors: same as data in course file - repeated for each assessment with a common Short or Full name - comma separated list of instructor names (names can contain special characters for accents, etc that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
+	TAs: same as data in course file - repeated for each session with a common Short or Full name - comma separated list of course TAs
+	Assessment title: title of assessment
+	Assessment type: label for type of assessment (exam, assignment, quiz)
 	Section: label for lecture, lab or seminar section e.g. A1, B2
-	Format: exam format
-	weight: assessment weight
-	due date: date assessment is due or happens
-	Specific objectives: comma separated list of session learning outcomes
-	Course outcomes: all: multiple columns for each course outcome listed for a course
+	Format: exam format choice (multiple choice, written response, etc.)
+	weight: assessment weight in percent
+	cumulative: y/n variable indicating if exam is cumulative
+	due date: date assessment is due or happens (data also unreliable - see description under session for this field)
+	Specific objectives: comma separated list of session learning outcomes assessed
+	Course outcomes: all: multiple columns for each course outcome attached to this session
 
 2. Search interface with results on the same page
 
