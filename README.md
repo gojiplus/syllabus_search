@@ -16,14 +16,12 @@ select the starting year (drop down of options included in the database) and ter
 
 select ending year and term
 
+option to enter keywords using Boolean operators as a basis to further filter courses where the keywords or combination of keywords are present in any of the course, nested session, or nested assessment fields
+
 reveal table of courses that are in the specified range of time
 
 	Table of course results should have sort and filter functionality for "Course name", "Year", "Term", "Credits", "Faculty Tags", "Course Instructor(s)", and "Teaching Assistants" columns
 	
-	offer option to enter keywords using "and" "or" operators as a basis to further filter courses
-	
-	where the keywords or combination of keywords are present in any of the course, nested session, or nested assessment fields
-
 	keywords should be highlighted where they occur in course fields
 	
 	users can download a csv or pdf of final results
@@ -70,7 +68,7 @@ Session CSV:
 	Short Name: course short name (unique course id common in all three files)
 	Full Name: course full name (unique course id common in all three files)
 	Faculty: ignore
-	Category: same as data in course file - comma separated course tags (e.g. program the course is in (BScPharm, PharmD, PPPharmD), year of program (1st, 2nd, 3rd), category of course content (pharm sci, practice skills, etc.))
+	Category: same as data in course file - repeated for each session with a common Short or Full name - comma separated course tags (e.g. program the course is in (BScPharm, PharmD, PPPharmD), year of program (1st, 2nd, 3rd), category of course content (pharm sci, practice skills, etc.))
 	Instructors: same as data in course file - repeated for each session with a common Short or Full name - comma separated list of instructor names (names can contain special characters for accents, etc that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
 	TAs: same as data in course file - repeated for each session with a common Short or Full name - comma separated list of course TAs
 	Session title: title of lecture lab or seminar
