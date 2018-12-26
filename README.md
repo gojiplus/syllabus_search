@@ -1,106 +1,35 @@
-# Search Syllabus
+## Search Syllabus
+
+Many higher level educational programs in the West provide a fair bit of flexibility to the instructors around how to structure the courses. But we still want students to have certain basic skills when they graduate. To accomplish that, certifying boards mandate that educational programs teach and assess a broad set of core skills in a systematic manner.
+
+To help administrators easily find out gaps in instruction and assessment of various skills, this tool provides a quick way to search and sift through lectures, labs, seminars, and assessments. 
+
+The tool is powered by three joinable datasets: a [course level dataset](data/courses.csv), which contains metadata on each course, a [session level dataset](data/sessions.csv), which contains metadata on all the sessions in each course, and [assessments level dataset](data/assessments.csv), which contains metadata on all the assessments in each course. The schema and details about the column names for each of the files is posted [here](raw_data_schema.md).
+
+### Functionality
+
+* Database: Swap out the database with a new set of CSVs.
+
+* Interface:
+
+See [wire_diagram.pdf](wire_diagram.pdf) for the proposed UI.
+
+Here's the workflow:
+
+1. Users enter keyword(s) and year/term range. We left_join course, session, and assessments data and report **back all courses** where one or more of the keywords match in session, assessments or course level data.
+
+2. If the keyword(s) is in the course level data, we highlight the keyword(s) in the table.
+
+3. Users can then sort or filter the columns "Course name", "Year", "Term", "Credits", "Faculty Tags", "Course Instructor(s)", and "Teaching Assistants" columns. 
+
+4. They can also export as CSV or pdf the final table.
+
+5. They can also see all the sessions and assessments related to the final filtered table from #3. The sessions and assessments will come out as separate tables on the same page. Both of these tables will support #2, #3, and #4.
+	* Table of session/assessments results should have sort and filter functionality for "Course name", "Type", "Date", "Length", "Course Instructor", "Lecturer", "Teaching Strategies", and "Delivery Mode" columns
 
 ## Deliverables
 
 * Deployed application without errors
 * Documented scripts in clean style
 * A readme that lays out how the code is organized
-* A config file that has details of the database etc.
-
-## Search a database of information about lectures, labs, seminars, and assessments nested in courses based on a user provided time frame
-## produce results as interactive tables (sort and filter functionality for specified columns) 
-
-[https://xxxx.pharmacy.ualberta.ca](http://xxxx.pharmacy.ualberta.ca) search syllabus information for content in the curriculum
-
-select the starting year (drop down of options included in the database) and term (Fall, Winter, or Spring/Summer)
-
-select ending year and term
-
-option to enter keywords using Boolean operators as a basis to further filter courses where the keywords or combination of keywords are present in any of the course, nested session, or nested assessment fields
-
-reveal table of courses that are in the specified range of time
-
-	Table of course results should have sort and filter functionality for "Course name", "Year", "Term", "Credits", "Faculty Tags", "Course Instructor(s)", and "Teaching Assistants" columns
-	
-	keywords should be highlighted where they occur in course fields
-	
-	users can download a csv or pdf of final results
-	
-	after course filters are selected users can select to reveal the sessions and assessments that contain any of the keywords
-
-reveal a table of sessions where the keywords or combination of keywords are present in any session fields
-
-	keywords should be highlighted where they occur in session fields
-	
-	Table of session results should have sort and filter functionality for "Course name", "Type", "Date", "Length", "Course Instructor", "Lecturer", "Teaching Strategies", and "Delivery Mode" columns
-
-	users can download a csv or pdf of final results
-
-reveal a table of assessments where the keywords or combination of keywords are present in any assessment fields
-
-	keywords should be highlighted where they occur in session fields
-	
-	Table of sessions results should have sort and filter functionality for "Course name", "Course Instructor", "Type", "Exam Format", "Weight", "Cumulative", "Teaching Strategies", and "Date" columns
-
-	users can download a csv or pdf of final results	
-	
-## Main Parts
-
-1. [update_dbs.py](scrips/update_dbs.py) will take three CSVs with the following fields and update the database.
-
-Course CSV:
-
-	Short Name: course short name (unique course id common in all three files)
-	Full Name: course full name (unique course id common in all three files)
-	Year: numeric
-	Term: Fall, Winter, Spring, or Summer
-	Faculty: ignore
-	Course Types: comma separated course tags (e.g. program the course is in (BScPharm, PharmD, PPPharmD), year of program (1st, 2nd, 3rd), category of course content (pharm sci, practice skills, etc.))
-	Credits: number of course credits
-	Instructors: comma separated list of instructor names (names can contain special characters for accents that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
-	TAs: comma separated list of course TAs
-	Assessment: number of graded assessments
-	Session count: number of sessions (lectures, labs, seminars)
-	Course outcomes: all: multiple columns for each instructor written course outcome attached to a course (output could produce separate rows for each outcome if getting results in one column is difficult) 
-
-Session CSV:
-
-	Short Name: course short name (unique course id common in all three files)
-	Full Name: course full name (unique course id common in all three files)
-	Faculty: ignore
-	Category: same as data in course file - repeated for each session with a common Short or Full name - comma separated course tags (e.g. program the course is in (BScPharm, PharmD, PPPharmD), year of program (1st, 2nd, 3rd), category of course content (pharm sci, practice skills, etc.))
-	Instructors: same as data in course file - repeated for each session with a common Short or Full name - comma separated list of instructor names (names can contain special characters for accents, etc that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
-	TAs: same as data in course file - repeated for each session with a common Short or Full name - comma separated list of course TAs
-	Session title: title of lecture lab or seminar
-	Section: ignore
-	Location: room location
-	Guest teacher: name(s) of guest lecturers (names can contain special characters for accents, etc that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
-	Type: session type Lec (lecture), Lab, Seminar
-	Length: session length in mins
-	Date: date session occurs (this data is very error prone - the dates will always be in the right sequence but the actual dates are not reliable. use the Year and Term fields as the initial basis to sort results, then sort by this Date field).
-	Teaching strategies: comma separated list of teaching strategies employed
-	Instruction type: face-to-face or distance
-	topics: comma separated list of topics covered in the session
-	Specific objectives: comma separated list of session learning outcomes
-	Course outcomes: all: multiple columns for each course outcome attached to this sessions
-	
-Assessment CSV:
-
-	Short Name: course short name (unique course id common in all three files)
-	Full Name: course full name (unique course id common in all three files)
-	Faculty: ignore
-	Category: same as data in course file - repeated for each assessment with a common Short or Full name - comma separated course tags (e.g. program the course is in (BScPharm, PharmD, PPPharmD), year of program (1st, 2nd, 3rd), category of course content (pharm sci, practice skills, etc.))
-	Instructors: same as data in course file - repeated for each assessment with a common Short or Full name - comma separated list of instructor names (names can contain special characters for accents, etc that produce errors, names should also be checked to find and replace similar repeats with standardized consistent results)
-	TAs: same as data in course file - repeated for each session with a common Short or Full name - comma separated list of course TAs
-	Assessment title: title of assessment
-	Assessment type: label for type of assessment (exam, assignment, quiz)
-	Section: label for lecture, lab or seminar section e.g. A1, B2
-	Format: exam format choice (multiple choice, written response, etc.)
-	weight: assessment weight in percent
-	cumulative: y/n variable indicating if exam is cumulative
-	due date: date assessment is due or happens (data also unreliable - see description under session for this field)
-	Specific objectives: comma separated list of session learning outcomes assessed
-	Course outcomes: all: multiple columns for each course outcome attached to this session
-
-2. Search interface with results on the same page
-
+* A config file that has details of the database, etc.
