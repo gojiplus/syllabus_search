@@ -8,62 +8,32 @@ Main application of syllabus project
 
 import os
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from urllib.parse import quote_plus
+from sqlalchemy import create_engine
+from sqlalchemy.engine.url import URL
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.ext.declarative import declarative_base
+from .utils import config
 
-
-def parse_db_uri(conf):
-    """
-    Parse input database config into database URI format
-
-    :param conf:    input database config
-    :type conf:     dict
-    :return:        string of database config in URI format
-    :rtype:         str
-    """
-
-    # Input config must be a dict
-    assert isinstance(conf, dict)
-
-    # Key 'dbname' is required in config
-    if 'dbname' not in conf:
-        raise ValueError('No database specified')
-
-    # Read and parse config
-    dbname = str(conf['dbname'])
-    host = str(conf.get('host', '127.0.0.1') or '127.0.0.1')
-    port = str(conf.get('port', ''))
-    user = str(conf.get('user', ''))
-    passwd = str(conf.get('passwd', ''))
-    driver = str(conf.get('driver', 'postgresql')).lower() or 'postgresql'
-
-    if user and passwd:
-        user = '%s:%s@' % (user, passwd)
-    elif user:
-        user = '%s@' % user
-    elif passwd:
-        raise ValueError('No user with that password')
-
-    if port:
-        if not port.isdigit():
-            raise ValueError('Database port must be a number')
-        host = '%s:%s' % (host, port)
-
-    # Return parsed config in URI format
-    return '{}://{}{}/{}'.format(driver, user, host, dbname)
-
-
-app = Flask(__name__, instance_relative_config=True)
+app = Flask(__name__)
 app.secret_key = os.urandom(32)
 
-app.config.from_object('config')
+__db_uri__ = URL(
+    drivername='postgresql',
+    host=config.get('postgresql', 'host', fallback='localhost'),
+    port=config.get('postgresql', 'port', fallback='5432'),
+    username=config.get('postgresql', 'user'),
+    password=quote_plus(config.get('postgresql', 'password')),
+    database=config.get('postgresql', 'database')
+)
 
-if os.path.isfile(os.path.join(app.root_path, 'instance/config.py')):
-    app.config.from_pyfile('config.py')
-
-app.config['SQLALCHEMY_DATABASE_URI'] = parse_db_uri(conf=app.config['DB_SETTINGS'])
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
+engine = create_engine(__db_uri__, echo=config.getboolean('postgresql', 'debug'))
+SessionFactory = sessionmaker(bind=engine)
+Base = declarative_base()
 
 from . import models
+
+Base.metadata.create_all(bind=engine)
+db = SessionFactory()  # type: Session
+
 from . import views
