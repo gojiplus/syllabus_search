@@ -3,3 +3,5 @@ Jinja2>=2.10
 uwsgi>=2.0.17
 SQLAlchemy
 psycopg2-binary
+lxml
+cssselect
