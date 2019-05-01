@@ -114,6 +114,7 @@ class Degrees:
 class Parser:
     file = None
     has_header = True
+    data_asdict = False
 
     def __init__(self, file=None, autofix=False):
         self.data = None
@@ -121,7 +122,17 @@ class Parser:
         self.parse_file(file or self.file)
 
     def parse_data(self, data):
-        self.data = data
+        if not self.data_asdict:
+            self.data = data
+            return
+
+        result = OrderedDict()
+        for item in data:
+            key = item.pop('key')
+            if key not in result:
+                result[key] = []
+            result[key].append(item)
+        self.data = result
 
     def parse_row(self, row):
         pass
@@ -143,12 +154,12 @@ class Parser:
             os.remove(file)
 
 
-class Course(Parser):
+class CourseCSV(Parser):
     file = getpath('data/courses.csv')
 
     def __init__(self, *args, **kwargs):
         self.degrees = Degrees()
-        super(Course, self).__init__(*args, **kwargs)
+        super(CourseCSV, self).__init__(*args, **kwargs)
 
     def parse_instructors(self, string: str):
         result, name = OrderedDict(), None
@@ -175,19 +186,11 @@ class Course(Parser):
         }
 
 
-class Session(Parser):
+class SessionCSV(Parser):
+    data_asdict = True
     file = getpath('data/sessions.csv')
     find_objectives = re.compile(r'"([^"]+)"').findall
     find_num = re.compile(r'\d+').findall
-
-    def parse_data(self, data):
-        result = OrderedDict()
-        for item in data:
-            key = item.pop('key')
-            if key not in result:
-                result[key] = []
-            result[key].append(item)
-        self.data = result
 
     def parse_row(self, row):
         def getmin(s):
@@ -209,6 +212,22 @@ class Session(Parser):
             'instruction_type': row[14].capitalize() or None,
             'topics': msplit(row[15], ';'),
             'objectives': self.find_objectives(row[16])
+        }
+
+
+class AssessmentCSV(SessionCSV):
+    file = getpath('data/assessments.csv')
+
+    def parse_row(self, row):
+        return {
+            'key': row[1].lower() or None,
+            'title': row[6] or None,
+            'type': row[7].capitalize() or None,
+            'format': row[8] or None,
+            'weight': int(row[9]) if row[9] else None,
+            'cumulative': row[10] or None,
+            'due_date': dateparse(row[11], '%y-%m-%d').date() if row[11] else None,
+            'objectives': self.find_objectives(row[12])
         }
 
 
