@@ -1,4 +1,5 @@
 import os, csv, pickle
+from tempfile import mkstemp
 from typing import Dict, Union
 from lxml import html
 from collections import OrderedDict
@@ -12,6 +13,25 @@ def msplit(string: str, separators='/,'):
         return [i.strip() for i in string.split(sep) if i.strip()]
     except StopIteration:
         return [string]
+
+
+def fix_csv(file):
+    with open(file, 'rb') as fp:
+        content = fp.read()
+
+    while True:
+        try:
+            content.decode()
+            break
+        except UnicodeDecodeError as exc:
+            pos = int(str(exc).split('in position')[-1].split(':')[0].strip())
+            content = content[:pos] + content[pos+1:]
+
+    _, dpath = mkstemp()
+    with open(dpath, 'wb') as fp:
+        fp.write(content)
+
+    return dpath
 
 
 class Degrees:
@@ -77,8 +97,9 @@ class Parser:
     file = None
     has_header = True
 
-    def __init__(self, file=None):
+    def __init__(self, file=None, autofix=False):
         self.data = None
+        self.autofix = autofix
         self.parse_file(file or self.file)
 
     def parse_data(self, data):
@@ -89,21 +110,27 @@ class Parser:
 
     def parse_file(self, file):
         assert file and os.path.isfile(file)
+        if self.autofix:
+            file = fix_csv(file)
+
         data = []
         with open(file, newline='', encoding='utf8') as fp:
             for idx, row in enumerate(csv.reader(fp)):
                 if self.has_header and idx == 0:
                     continue
                 data.append(self.parse_row(row))
-        self.parse_data(data)
+            self.parse_data(data)
+
+        if self.autofix and os.path.isfile(file):
+            os.remove(file)
 
 
 class Course(Parser):
     file = getpath('data/courses.csv')
 
-    def __init__(self, file=None):
+    def __init__(self, *args, **kwargs):
         self.degrees = Degrees()
-        super(Course, self).__init__(file)
+        super(Course, self).__init__(*args, **kwargs)
 
     def parse_instructors(self, string: str):
         result, name = OrderedDict(), None
