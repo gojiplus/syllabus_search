@@ -1,4 +1,4 @@
-import os, csv, pickle
+import re, os, csv, pickle, datetime
 from tempfile import mkstemp
 from typing import Dict, Union
 from lxml import html
@@ -7,12 +7,30 @@ from urllib.request import urlopen
 from app.utils import getpath
 
 
-def msplit(string: str, separators='/,'):
-    try:
-        sep = next(filter(lambda s: s in string, separators))
-        return [i.strip() for i in string.split(sep) if i.strip()]
-    except StopIteration:
+dateparse = datetime.datetime.strptime
+
+
+def msplit(string: str, separators='/,;&'):
+    def findsep(s: str):
+        try:
+            return next(filter(lambda i: i in s, separators))
+        except StopIteration:
+            return None
+
+    if string:
+        sep = findsep(string)
+        if sep:
+            ret = []
+            for item in string.split(sep):
+                item = item.strip()
+                if item:
+                    if findsep(item):
+                        ret.extend(msplit(item))
+                        continue
+                    ret.append(item)
+            return ret
         return [string]
+    return []
 
 
 def fix_csv(file):
@@ -143,17 +161,54 @@ class Course(Parser):
 
     def parse_row(self, row):
         return {
-            'key': row[1].lower(),
-            'short_name': row[0],
-            'full_name': row[1],
+            'key': row[1].lower() or None,
+            'name': row[0] or None,
+            'full_name': row[1] or None,
             'year': int(row[2]) if row[2] else None,
-            'term': row[3].capitalize(),
-            'faculty': row[4],
+            'term': row[3].capitalize() or None,
+            'faculty': row[4] or None,
             'categories': msplit(row[5]),
             'credits': float(row[6]) if row[6] else None,
             'instructors': self.parse_instructors(row[7]),
             'tas': msplit(row[8]),
             'outcomes': [i for i in row[11:] if i]
+        }
+
+
+class Session(Parser):
+    file = getpath('data/sessions.csv')
+    find_objectives = re.compile(r'"([^"]+)"').findall
+    find_num = re.compile(r'\d+').findall
+
+    def parse_data(self, data):
+        result = OrderedDict()
+        for item in data:
+            key = item.pop('key')
+            if key not in result:
+                result[key] = []
+            result[key].append(item)
+        self.data = result
+
+    def parse_row(self, row):
+        def getmin(s):
+            found = self.find_num(s)
+            if found:
+                return int(found[0])
+            return None
+
+        return {
+            'key': row[1].lower() or None,
+            'title': row[6] or None,
+            'section': row[7] or None,
+            'location': row[8] or None,
+            'guest_teachers': msplit(row[9]),
+            'type': row[10].capitalize() or None,
+            'length': getmin(row[11]),
+            'date': dateparse(row[12], '%Y-%m-%d').date() if row[12] else None,
+            'teaching_strategies': msplit(row[13]),
+            'instruction_type': row[14].capitalize() or None,
+            'topics': msplit(row[15], ';'),
+            'objectives': self.find_objectives(row[16])
         }
 
 
