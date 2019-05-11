@@ -1,10 +1,16 @@
-import re, os, csv, pickle, datetime
+#!/usr/bin/env python3
+
+import re, os, csv, sys
+import pickle, datetime, time
 from tempfile import mkstemp
 from typing import Dict, Union
 from lxml import html
 from collections import OrderedDict
 from urllib.request import urlopen
+from argparse import ArgumentParser
 from app.utils import getpath
+from app import db, Base
+from app.models import *
 
 
 dateparse = datetime.datetime.strptime
@@ -34,6 +40,7 @@ def msplit(string: str, separators='/,;&'):
 
 
 def fix_csv(file):
+    print('  + fixing encoding errors if any...')
     with open(file, 'rb') as fp:
         content = fp.read()
 
@@ -90,6 +97,8 @@ class Degrees:
         return degree in haystack
 
     def query_upstream(self):
+        print('Downloading degrees from %r...' % self.url)
+
         resp = urlopen(self.url)
         tree = html.fromstring(resp.read().decode())
         tables = tree.cssselect('div#contentColumn table')
@@ -139,6 +148,8 @@ class Parser:
 
     def parse_file(self, file):
         assert file and os.path.isfile(file)
+
+        print('Parsing %r...' % file)
         if self.autofix:
             file = fix_csv(file)
 
@@ -152,6 +163,8 @@ class Parser:
 
         if self.autofix and os.path.isfile(file):
             os.remove(file)
+
+        print('  + done.')
 
 
 class CourseCSV(Parser):
@@ -231,9 +244,122 @@ class AssessmentCSV(SessionCSV):
         }
 
 
+def get_args():
+    parser = ArgumentParser()
+
+    parser.add_argument('-c', '--course', metavar='FILE',
+                        help='path to courses.csv, default is \'data/courses.csv\'')
+
+    parser.add_argument('-s', '--session', metavar='FILE',
+                        help='path to sessions.csv, default is \'data/sessions.csv\'')
+
+    parser.add_argument('-a', '--assessment', metavar='FILE',
+                        help='path to assessments.csv, default is \'data/assessments.csv\'')
+
+    parser.add_argument('-f', '--fix-encoding', action='store_true', default=False,
+                        help='fix the errors of character encoding automatically')
+
+    # parser.add_argument('-r', '--refresh', action='store_true', default=False,
+    #                     help='clean-up to refresh the database before import')
+
+    args = parser.parse_args()
+    args.refresh = True
+
+    return args
+
+
+def cleanup():
+    confirm = input('You\'re about to clean up database by running this task. '
+                    'Type "YES" to confirm: ')
+    if confirm != 'YES':
+        sys.exit()
+
+    print('Cleaning up database...')
+    for table in reversed(Base.metadata.sorted_tables):
+        db.execute(table.delete())
+        if '_' not in table.name:
+            seq = '%s_seq' % table.name
+            db.execute('ALTER SEQUENCE %s RESTART WITH 1;' % seq)
+    db.commit()
+
+
+def create_categories(categories):
+    ret = []
+    for name in categories:
+        cat = db.query(Category).filter_by(name=name).one_or_none()
+        if not cat:
+            cat = Category(name=name)
+            db.add(cat)
+            db.commit()
+        ret.append(cat)
+    return ret
+
+
+def create_instructors(instructors):
+    ret = []
+    for name, degrees in instructors.items():
+        instructor = db.query(Instructor).filter_by(name=name).one_or_none()
+        if not instructor:
+            instructor = Instructor(name=name, degrees=degrees)
+            db.add(instructor)
+            db.commit()
+        ret.append(instructor)
+    return ret
+
+
 def main():
-    pass
+    args = get_args()
+
+    # Cleanup db
+    if args.refresh:
+        cleanup()
+
+    # Parsing files
+    courses_csv = CourseCSV(file=args.course, autofix=args.fix_encoding)
+    sessions_csv = SessionCSV(file=args.session, autofix=args.fix_encoding)
+    assess_csv = AssessmentCSV(file=args.assessment, autofix=args.fix_encoding)
+
+    print('Importing...')
+    time.sleep(1)
+
+    # Import data
+    for data in courses_csv.data:
+        key = data.pop('key')
+        print('* Course:', data['full_name'])
+
+        # Construct sessions
+        sessions = sessions_csv.data.get(key)
+        if sessions:
+            sessions = [Session(**i) for i in sessions]
+            print('  -> %d sessions found' % len(sessions))
+
+        # Construct assessments
+        assessments = assess_csv.data.get(key)
+        if assessments:
+            assessments = [Assessment(**i) for i in assessments]
+            print('  -> %d assessments found' % len(assessments))
+
+        # Construct course
+        categories = create_categories(data.pop('categories'))
+        instructors = create_instructors(data.pop('instructors'))
+        course = Course(**data, categories=categories, instructors=instructors,
+                        sessions=sessions or [], assessments=assessments or [])
+
+        # Insert to db
+        print('  -> saving...')
+        db.add(course)
+        if sessions:
+            db.add_all(sessions)
+        if assessments:
+            db.add_all(assessments)
+        db.commit()
+
+    print('Done.')
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        sys.exit(main())
+    except Exception as exc:
+        print('Error: %s' % exc)
+        sys.exit(1)

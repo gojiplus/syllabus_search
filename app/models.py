@@ -42,7 +42,7 @@ class Instructor(Base):
     __tablename__ = 'instructors'
 
     id = Column(Integer, Sequence('instructors_seq'), primary_key=True)
-    name = Column(Text, nullable=False)
+    name = Column(Text, nullable=False, unique=True)
     degrees = Column(ARRAY(Text))
     courses = relationship('Course', secondary=course_instructor,
                            back_populates='instructors')
