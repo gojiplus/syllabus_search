@@ -1,12 +1,15 @@
 import os
-from configparser import ConfigParser
+from . import app
+from configparser import ConfigParser, NoOptionError, NoSectionError
 
 __all__ = [
     'getpath',
-    'config'
+    'config',
+    'template_exists',
+    'get_conf'
 ]
 
-MAIN_DIR = os.path.dirname(os.path.dirname(__file__))
+MAIN_DIR = os.path.dirname(app.root_path)
 
 
 def getpath(*path):
@@ -28,3 +31,14 @@ config = ConfigParser(
     }
 )
 config.read(getpath('config.ini'))
+
+
+def template_exists(template):
+    return os.path.exists(os.path.join(app.root_path, app.template_folder, template))
+
+
+def get_conf(section, option, fallback=None):
+    try:
+        return config.get(section, option)
+    except (NoOptionError, NoSectionError):
+        return fallback
