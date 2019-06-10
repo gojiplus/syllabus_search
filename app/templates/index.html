@@ -1,10 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends "layout.html" %}
+{% block body %}
+  <form action="{{ url_for('index') }}" method="post">
+    <div class="form-group row">
+      <label for="start_year" class="col-sm-3 col-12 col-form-label">Starting Year</label>
+      <div class="col-sm-9 col-12">
+        <select class="form-control" id="start_year" name="start_year">
+          <option selected>Choose...</option>
+          <option>2016</option>
+          <option>2017</option>
+          <option>2018</option>
+          <option>2019</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="start_term" class="col-sm-3 col-12 col-form-label">Starting Term</label>
+      <div class="col-sm-9 col-12">
+        <select class="form-control" id="start_term" name="start_term">
+          <option selected>Choose...</option>
+          <option>Fall</option>
+          <option>Winter</option>
+          <option>Spring</option>
+          <option>Summer</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="end_year" class="col-sm-3 col-12 col-form-label">Ending Year</label>
+      <div class="col-sm-9 col-12">
+        <select class="form-control" id="end_year" name="end_year">
+          <option selected>Choose...</option>
+          <option>2016</option>
+          <option>2017</option>
+          <option>2018</option>
+          <option>2019</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="end_term" class="col-sm-3 col-12 col-form-label">Ending Term</label>
+      <div class="col-sm-9 col-12">
+        <select class="form-control" id="end_term" name="end_term">
+          <option selected>Choose...</option>
+          <option>Fall</option>
+          <option>Winter</option>
+          <option>Spring</option>
+          <option>Summer</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group row">
+      <label for="keyword" class="col-sm-3 col-12 col-form-label">Keyword(s)</label>
+      <div class="col-sm-9 col-12">
+        <input type="text" class="form-control" id="keyword" placeholder="Enter your keywords here...">
+      </div>
+    </div>
+    <div class="form-group row">
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary mt-3 px-5 col-sm-4 col-12 float-right">Search</button>
+      </div>
+    </div>
+  </form>
+  {%- block datatable %}{% endblock -%}
+{% endblock %}

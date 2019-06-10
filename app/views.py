@@ -45,11 +45,29 @@ def _render(page, **kwargs):
     variables = deepcopy(GLOBAL_VARS)
     title = get_conf(page, 'title')
     header = get_conf(page, 'header')
+    intro = get_conf(page, 'intro')
     if title:
         variables['title'] = title
     if header:
         variables['header'] = header
+    if intro:
+        variables['intro'] = intro
     variables.update(kwargs)
 
     # Render template
     return render_template(template, **variables)
+
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    """Main index page of application. Accepts both GET and POST methods"""
+
+    # Method is POST
+    if request.method == 'POST':
+        keywords = request.form.get('keywords')
+        if keywords:
+            return redirect(url_for('result', keywords=quote(keywords)))
+
+    # Method is GET or POST with empty data
+    return _render('index')
+

@@ -1,5 +1,6 @@
 import os
 from . import app
+from flask import url_for, request
 from configparser import ConfigParser, NoOptionError, NoSectionError
 
 __all__ = [
@@ -31,6 +32,25 @@ config = ConfigParser(
     }
 )
 config.read(getpath('config.ini'))
+
+
+def endswith(str1, str2):
+    return str1.lower().endswith(str2.lower())
+
+
+def static_url(filename):
+    return url_for('static', filename=filename)
+
+
+def url_for_other_page(page):
+    args = request.view_args.copy()
+    args['page'] = page
+    return url_for(request.endpoint, **args)
+
+
+app.jinja_env.tests['endswith'] = endswith
+app.jinja_env.filters['static_url'] = static_url
+app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 
 
 def template_exists(template):

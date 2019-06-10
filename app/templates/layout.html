@@ -54,13 +54,15 @@
     {%- endif -%}
   {%- endwith -%}
   <div class="mb-5 h2">
-    <br><h4>{% block header %}{%- if header %}{{ header }}{% endif -%}{% endblock %}</h4>
+    <br><h4><strong>{% block header %}{%- if header %}{{ header }}{% endif -%}{% endblock %}</strong></h4>
+    <h6 class="text-secondary font-italic">{% block intro %}{%- if intro %}{{ intro }}{% endif -%}{% endblock %}</h6>
   </div>
   {%- block body %}{% endblock -%}
 </div>
+<br>
 <footer class="mt-5 page-footer">
   <div class="text-center">
-    © 2018 Copyright: <a href="{{ url_for('index') }}">countpy</a>
+    <span class="text-secondary">© 2019 Copyright: </span><a href="{{ url_for('index') }}">Syllabus Search</a>
   </div>
 </footer>
 </body>
