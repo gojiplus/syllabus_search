@@ -31,7 +31,7 @@ engine = create_engine(__db_uri__, echo=utils.config.getboolean('postgresql', 'd
 SessionFactory = sessionmaker(bind=engine)
 Base = declarative_base()
 
-from . import models
+from .models import *
 
 Base.metadata.create_all(bind=engine)
 db = SessionFactory()  # type: Session

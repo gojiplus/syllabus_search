@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
-  <form action="{{ url_for('index') }}" method="post">
+<form action="{{ url_for('index') }}" method="post" class="mb-5">
     <div class="form-group row">
       <label for="start_year" class="col-sm-3 col-12 col-form-label">Starting Year</label>
       <div class="col-sm-9 col-12">
         <select class="form-control" id="start_year" name="start_year">
-          <option selected>Choose...</option>
+          <option value="" selected>Choose...</option>
           <option>2016</option>
           <option>2017</option>
           <option>2018</option>
@@ -17,7 +17,7 @@
       <label for="start_term" class="col-sm-3 col-12 col-form-label">Starting Term</label>
       <div class="col-sm-9 col-12">
         <select class="form-control" id="start_term" name="start_term">
-          <option selected>Choose...</option>
+          <option value="" selected>Choose...</option>
           <option>Fall</option>
           <option>Winter</option>
           <option>Spring</option>
@@ -29,7 +29,7 @@
       <label for="end_year" class="col-sm-3 col-12 col-form-label">Ending Year</label>
       <div class="col-sm-9 col-12">
         <select class="form-control" id="end_year" name="end_year">
-          <option selected>Choose...</option>
+          <option value="" selected>Choose...</option>
           <option>2016</option>
           <option>2017</option>
           <option>2018</option>
@@ -41,7 +41,7 @@
       <label for="end_term" class="col-sm-3 col-12 col-form-label">Ending Term</label>
       <div class="col-sm-9 col-12">
         <select class="form-control" id="end_term" name="end_term">
-          <option selected>Choose...</option>
+          <option value="" selected>Choose...</option>
           <option>Fall</option>
           <option>Winter</option>
           <option>Spring</option>
@@ -61,5 +61,25 @@
       </div>
     </div>
   </form>
-  {%- block datatable %}{% endblock -%}
+{%- if course_data %}
+  <h6 class="mb-5"><strong>Course Information Results</strong></h6>
+  <table id="course_table" class="table table-striped table-bordered">
+    <thead>
+      <tr>
+      {%- for header in course_data[0] %}
+        <th>{{ header|safe }}</th>
+      {%- endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    {%- for row in course_data[1:] %}
+      <tr>
+      {%- for cell in row %}
+        <td>{{ cell|safe }}</td>
+      {%- endfor %}
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+{%- endif %}
 {% endblock %}

@@ -39,6 +39,8 @@ def endswith(str1, str2):
 
 
 def static_url(filename):
+    if filename.startswith('http://') or filename.startswith('https://'):
+        return filename
     return url_for('static', filename=filename)
 
 
