@@ -60,10 +60,14 @@ class Course(Base):
     credits = Column(Float)
     outcomes = Column(ARRAY(Text))
     tas = Column(ARRAY(Text))
+    num_sessions = Column(Integer, default=0)
+    num_assessments = Column(Integer, default=0)
     sessions = relationship('Session', back_populates='course')
     assessments = relationship('Assessment', back_populates='course')
-    categories = relationship('Category', secondary=course_category, back_populates='courses')
-    instructors = relationship('Instructor', secondary=course_instructor, back_populates='courses')
+    categories = relationship('Category', secondary=course_category,
+                              back_populates='courses')
+    instructors = relationship('Instructor', secondary=course_instructor,
+                               back_populates='courses', lazy='joined')
 
 
 class Session(Base):

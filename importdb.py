@@ -330,14 +330,18 @@ def main():
         # Construct sessions
         sessions = sessions_csv.data.get(key)
         if sessions:
+            num_sessions = len(sessions)
+            data['num_sessions'] = num_sessions
             sessions = [Session(**i) for i in sessions]
-            print('  -> %d sessions found' % len(sessions))
+            print('  -> %d sessions found' % num_sessions)
 
         # Construct assessments
         assessments = assess_csv.data.get(key)
         if assessments:
+            num_assessments = len(assessments)
+            data['num_assessments'] = num_assessments
             assessments = [Assessment(**i) for i in assessments]
-            print('  -> %d assessments found' % len(assessments))
+            print('  -> %d assessments found' % num_assessments)
 
         # Construct course
         categories = create_categories(data.pop('categories'))
