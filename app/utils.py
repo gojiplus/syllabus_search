@@ -7,7 +7,8 @@ __all__ = [
     'getpath',
     'config',
     'template_exists',
-    'get_conf'
+    'get_conf',
+    'list_parser'
 ]
 
 MAIN_DIR = os.path.dirname(app.root_path)
@@ -22,15 +23,7 @@ def getpath(*path):
     return MAIN_DIR
 
 
-config = ConfigParser(
-    converters={
-        'dict': lambda s: {
-            k.strip(): v.strip()
-            for k, v in (i.split(':') for i in s.split('\n'))
-        } if s != 'null' else {},
-        'list': lambda s: s.split(',' if ',' in s else None) if s != 'null' else []
-    }
-)
+config = ConfigParser()
 config.read(getpath('config.ini'))
 
 
@@ -64,3 +57,25 @@ def get_conf(section, option, fallback=None):
         return config.get(section, option)
     except (NoOptionError, NoSectionError):
         return fallback
+
+
+def list_parser(string: str):
+    if string:
+        if ',' in string:
+            return [s.strip() for s in string.split(',')]
+        if '-' in string:
+            try:
+                start, end = [s.strip() for s in string.split('-')]
+            except ValueError:
+                pass
+            else:
+                if start.isdigit() and end.isdigit():
+                    ret = []
+                    start, end = int(start), int(end)
+                    while start <= end:
+                        ret.append(start)
+                        start += 1
+                    if ret:
+                        return ret
+        return [string.strip()]
+    return []

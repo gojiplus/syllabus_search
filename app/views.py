@@ -7,11 +7,9 @@ Rendering application pages.
 """
 
 from copy import deepcopy
-from urllib.parse import quote, unquote
-from flask import render_template, request, \
-    abort, flash, Response, url_for, redirect
+from flask import render_template, request, abort, flash
 from . import app, db, Course
-from .utils import template_exists, get_conf
+from .utils import template_exists, get_conf, list_parser
 
 GLOBAL_VARS = {
     'navbar': [
@@ -28,6 +26,7 @@ GLOBAL_VARS = {
     ],
     'scripts': [
         'vendor/jquery/dist/jquery.min.js',
+        'vendor/bootstrap/dist/js/bootstrap.min.js',
         'vendor/datatables.net/js/jquery.dataTables.min.js',
         'vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js',
         'vendor/datatables.net-select/js/dataTables.select.min.js',
@@ -65,7 +64,7 @@ def search_courses():
         instructors = ', '.join(i.name for i in obj.instructors)
         tas = ', '.join(i for i in obj.tas)
         return [obj.name, obj.year, obj.term, obj.credits, obj.faculty,
-                instructors, tas, len(obj.assessments), len(obj.sessions)]
+                instructors, tas, obj.num_assessments, obj.num_sessions]
 
     data = [['Name', 'Year', 'Term', 'Credits', 'Faculty',
              'Instructors', 'TAs', 'No. Assess.', 'No. Sessions']]
@@ -78,14 +77,23 @@ def search_courses():
 def index():
     """Main index page of application. Accepts both GET and POST methods"""
 
-    def form_data():
-        return {k: quote(v) for k, v in request.form.items() if v}
+    kwargs = {
+        'course_data': None, 'form_data': None,
+        'years': list_parser(get_conf('search_form', 'years', fallback='')),
+        'terms': list_parser(get_conf('search_form', 'terms', fallback=''))
+    }
 
     # Method is POST
     if request.method == 'POST':
-        data = form_data()
+        data = {k: v for k, v in request.form.items() if v}
+        reset = data.pop('reset', False)
         if data:
-            return redirect(url_for('result', **data))
+            if reset is False:
+                kwargs['form_data'] = dict(request.form.items())
+                kwargs['course_data'] = search_courses()
+                flash('Temporarily return all courses data', 'success')
+        else:
+            flash('Unable to search! You have not filled in the form.', 'failed')
 
     # Method is GET or POST with empty data
-    return _render('index', course_data=search_courses())
+    return _render('index', **kwargs)
