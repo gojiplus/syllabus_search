@@ -3,7 +3,7 @@
 {%- if course_data %}
   {%- set btn_color = 'secondary' %}
   {%- set btn_text = 'Reset' %}
-  {%- set readonly = ' readonly' %}
+  {%- set readonly = ' disabled' %}
 {%- else  %}
   {%- set btn_color = 'primary' %}
   {%- set btn_text = 'Search' %}
@@ -11,10 +11,18 @@
 {%- endif %}
 <form action="{{ url_for('index') }}" method="post" class="mb-5">
     <div class="form-group row">
-      <label for="start_year" class="col-sm-3 col-12 col-form-label">Starting Year</label>
-      <div class="col-sm-9 col-12">
-        <select class="form-control" id="start_year" name="start_year"{% if readonly %} disabled{% endif %}>
-          <option value=""{% if not form_data.start_year %} selected{% endif %}>--</option>
+      <span class="col-2 col-form-label">Starting</span>
+      <div class="col-5" style="padding-right: 5px;">
+        <select class="form-control" id="start_term" name="start_term"{{ readonly }}>
+          <option value=""{% if not form_data.start_term %} selected{% endif %}>Term</option>
+        {%- for term in terms %}
+          <option{% if term == form_data.start_term %} selected{% endif %}>{{ term }}</option>
+        {%- endfor %}
+        </select>
+      </div>
+      <div class="col-5" style="padding-left: 5px;">
+        <select class="form-control" id="start_year" name="start_year"{{ readonly }}>
+          <option value=""{% if not form_data.start_year %} selected{% endif %}>Year</option>
         {%- for year in years %}
           <option{% if year|string == form_data.start_year %} selected{% endif %}>{{ year }}</option>
         {%- endfor %}
@@ -22,21 +30,18 @@
       </div>
     </div>
     <div class="form-group row">
-      <label for="start_term" class="col-sm-3 col-12 col-form-label">Starting Term</label>
-      <div class="col-sm-9 col-12">
-        <select class="form-control" id="start_term" name="start_term"{% if readonly %} disabled{% endif %}>
-          <option value=""{% if not form_data.start_term %} selected{% endif %}>--</option>
+      <span class="col-2 col-form-label">Ending</span>
+      <div class="col-5" style="padding-right: 5px;">
+        <select class="form-control" id="end_term" name="end_term"{{ readonly }}>
+          <option value=""{% if not form_data.end_term %} selected{% endif %}>Term</option>
         {%- for term in terms %}
-          <option{% if term == form_data.start_term %} selected{% endif %}>{{ term }}</option>
+          <option{% if term == form_data.end_term %} selected{% endif %}>{{ term }}</option>
         {%- endfor %}
         </select>
       </div>
-    </div>
-    <div class="form-group row">
-      <label for="end_year" class="col-sm-3 col-12 col-form-label">Ending Year</label>
-      <div class="col-sm-9 col-12">
-        <select class="form-control" id="end_year" name="end_year"{% if readonly %} disabled{% endif %}>
-          <option value=""{% if not form_data.end_year %} selected{% endif %}>--</option>
+      <div class="col-5" style="padding-left: 5px;">
+        <select class="form-control" id="end_year" name="end_year"{{ readonly }}>
+          <option value=""{% if not form_data.end_year %} selected{% endif %}>Year</option>
         {%- for year in years %}
           <option{% if year|string == form_data.end_year %} selected{% endif %}>{{ year }}</option>
         {%- endfor %}
@@ -44,26 +49,15 @@
       </div>
     </div>
     <div class="form-group row">
-      <label for="end_term" class="col-sm-3 col-12 col-form-label">Ending Term</label>
-      <div class="col-sm-9 col-12">
-        <select class="form-control" id="end_term" name="end_term"{% if readonly %} disabled{% endif %}>
-          <option value=""{% if not form_data.end_term %} selected{% endif %}>--</option>
-        {%- for term in terms %}
-          <option{% if term == form_data.end_term %} selected{% endif %}>{{ term }}</option>
-        {%- endfor %}
-        </select>
-      </div>
-    </div>
-    <div class="form-group row">
-      <label for="keyword" class="col-sm-3 col-12 col-form-label">Keyword(s)</label>
-      <div class="col-sm-9 col-12">
+      <label for="keyword" class="col-2 col-form-label">Keywords</label>
+      <div class="col-10">
         <input type="text" class="form-control" id="keyword" name="keyword" {% if form_data.keyword %}value="{{ form_data.keyword }}" {% endif %}placeholder="Enter your keywords here..."{{ readonly }}>
       </div>
     </div>
     {% if course_data %}<input type="hidden" name="reset" value="yes">{% endif %}
     <div class="form-group row">
       <div class="col-12">
-        <button type="submit" class="btn btn-{{ btn_color }} mt-3 px-5 col-sm-4 col-12 float-right">{{ btn_text }}</button>
+        <button type="submit" class="btn btn-{{ btn_color }} mt-3 px-5 col-sm-3 col-12 float-right">{{ btn_text }}</button>
       </div>
     </div>
   </form>
