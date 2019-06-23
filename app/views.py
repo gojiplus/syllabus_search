@@ -87,13 +87,13 @@ def index():
     if request.method == 'POST':
         data = {k: v for k, v in request.form.items() if v}
         reset = data.pop('reset', False)
-        if data:
-            if reset is False:
+        if reset is False:
+            if data:
                 kwargs['form_data'] = dict(request.form.items())
                 kwargs['course_data'] = search_courses()
                 flash('Temporarily return all courses data', 'success')
-        else:
-            flash('Unable to search! You have not filled in the form.', 'failed')
+            else:
+                flash('Unable to search! You have not filled in the form.', 'failed')
 
     # Method is GET or POST with empty data
     return _render('index', **kwargs)
