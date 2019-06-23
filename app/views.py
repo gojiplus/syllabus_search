@@ -73,14 +73,49 @@ def search_courses():
     return data
 
 
+def validate_data(data, terms, years):
+    required = {'start_term', 'end_term', 'start_year', 'end_year'}
+    missing = required - (required & set(data))
+    if missing:
+        flash('Missing required fields: %s' % ', '.join(str(i) for i in missing), 'failed')
+        return False
+
+    t1, t2 = data['start_term'], data['end_term']
+    y1, y2 = int(data['start_year']), int(data['end_year'])
+
+    if t1 not in terms:
+        flash('Unexpected starting term: %s' % t1, 'failed')
+        return False
+    if t2 not in terms:
+        flash('Unexpected ending term: %s' % t2, 'failed')
+        return False
+    if y1 not in years:
+        flash('Unexpected starting year: %d' % y1, 'failed')
+        return False
+    if y2 not in years:
+        flash('Unexpected starting year: %d' % y1, 'failed')
+        return False
+
+    if y1 < y2:
+        return True
+    elif y1 == y2:
+        p1, p2 = terms.index(t1), terms.index(t2)
+        if p1 <= p2:
+            return True
+
+    flash('Expected time range must be sooner to later', 'failed')
+    return False
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """Main index page of application. Accepts both GET and POST methods"""
 
+    terms = list_parser(get_conf('search_form', 'terms', fallback=''))
+    years = list_parser(get_conf('search_form', 'years', fallback=''))
+
     kwargs = {
-        'course_data': None, 'form_data': None,
-        'years': list_parser(get_conf('search_form', 'years', fallback='')),
-        'terms': list_parser(get_conf('search_form', 'terms', fallback=''))
+        'course_data': None, 'form_data': None, 'terms': terms, 'years': years
     }
 
     # Method is POST
@@ -90,8 +125,9 @@ def index():
         if reset is False:
             if data:
                 kwargs['form_data'] = dict(request.form.items())
-                kwargs['course_data'] = search_courses()
-                flash('Temporarily return all courses data', 'success')
+                if validate_data(data, terms, years):
+                    kwargs['course_data'] = search_courses()
+                    flash('Temporarily return all courses data', 'success')
             else:
                 flash('Unable to search! You have not filled in the form.', 'failed')
 

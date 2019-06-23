@@ -13,7 +13,7 @@
     <div class="form-group row">
       <span class="col-2 col-form-label">Starting</span>
       <div class="col-5" style="padding-right: 5px;">
-        <select class="form-control" id="start_term" name="start_term"{{ readonly }}>
+        <select class="form-control" id="start_term" name="start_term"{{ readonly }} required>
           <option value=""{% if not form_data.start_term %} selected{% endif %}>Term</option>
         {%- for term in terms %}
           <option{% if term == form_data.start_term %} selected{% endif %}>{{ term }}</option>
@@ -21,7 +21,7 @@
         </select>
       </div>
       <div class="col-5" style="padding-left: 5px;">
-        <select class="form-control" id="start_year" name="start_year"{{ readonly }}>
+        <select class="form-control" id="start_year" name="start_year"{{ readonly }} required>
           <option value=""{% if not form_data.start_year %} selected{% endif %}>Year</option>
         {%- for year in years %}
           <option{% if year|string == form_data.start_year %} selected{% endif %}>{{ year }}</option>
@@ -32,7 +32,7 @@
     <div class="form-group row">
       <span class="col-2 col-form-label">Ending</span>
       <div class="col-5" style="padding-right: 5px;">
-        <select class="form-control" id="end_term" name="end_term"{{ readonly }}>
+        <select class="form-control" id="end_term" name="end_term"{{ readonly }} required>
           <option value=""{% if not form_data.end_term %} selected{% endif %}>Term</option>
         {%- for term in terms %}
           <option{% if term == form_data.end_term %} selected{% endif %}>{{ term }}</option>
@@ -40,7 +40,7 @@
         </select>
       </div>
       <div class="col-5" style="padding-left: 5px;">
-        <select class="form-control" id="end_year" name="end_year"{{ readonly }}>
+        <select class="form-control" id="end_year" name="end_year"{{ readonly }} required>
           <option value=""{% if not form_data.end_year %} selected{% endif %}>Year</option>
         {%- for year in years %}
           <option{% if year|string == form_data.end_year %} selected{% endif %}>{{ year }}</option>
