@@ -1,4 +1,4 @@
-import os
+import os, datetime
 from . import app
 from flask import url_for, request
 from configparser import ConfigParser, NoOptionError, NoSectionError
@@ -69,7 +69,9 @@ def list_parser(string: str):
             except ValueError:
                 pass
             else:
-                if start.isdigit() and end.isdigit():
+                if start.isdigit() and (end.isdigit() or end in ('current', 'now')):
+                    if end in ('current', 'now'):
+                        end = datetime.datetime.now().year
                     ret = []
                     start, end = int(start), int(end)
                     while start <= end:
