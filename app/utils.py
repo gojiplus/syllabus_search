@@ -5,7 +5,6 @@ from configparser import ConfigParser, NoOptionError, NoSectionError
 
 __all__ = [
     'getpath',
-    'config',
     'template_exists',
     'get_conf',
     'list_parser'
@@ -19,12 +18,8 @@ def getpath(*path):
         path = os.path.join(*path)
         if os.path.isabs(path):
             return path
-        return os.path.join(MAIN_DIR, path)
-    return MAIN_DIR
-
-
-config = ConfigParser()
-config.read(getpath('config.ini'))
+        return os.path.join(APP_PATH, path)
+    return APP_PATH
 
 
 def endswith(str1, str2):
