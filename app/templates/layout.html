@@ -43,7 +43,7 @@
         {%- if category == 'failed' -%}
           {%- set class = 'danger' -%}
         {%- else -%}
-          {%- set class = 'success' -%}
+          {%- set class = category -%}
         {%- endif -%}
         <div class="alert alert-{{ class }} alert-dismissible">
           <button type="button" class="close" aria-label="Close" data-dismiss="alert"><span
