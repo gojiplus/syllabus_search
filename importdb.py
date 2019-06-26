@@ -2,6 +2,8 @@
 
 import re, os, csv, sys
 import pickle, datetime, time
+from sqlalchemy import func
+from abc import ABC, abstractmethod
 from tempfile import mkstemp
 from typing import Dict, Union
 from lxml import html
@@ -120,7 +122,7 @@ class Degrees:
             pickle.dump(data, fp)
 
 
-class Parser:
+class Parser(ABC):
     file = None
     has_header = True
     data_asdict = False
@@ -143,8 +145,13 @@ class Parser:
             result[key].append(item)
         self.data = result
 
+    @abstractmethod
     def parse_row(self, row):
-        pass
+        return row
+
+    @staticmethod
+    def parse_doc(row) -> str:
+        return func.to_tsvector(' '.join(i.strip() for i in row if i.strip()))
 
     def parse_file(self, file):
         assert file and os.path.isfile(file)
@@ -158,7 +165,10 @@ class Parser:
             for idx, row in enumerate(csv.reader(fp)):
                 if self.has_header and idx == 0:
                     continue
-                data.append(self.parse_row(row))
+                parsed = self.parse_row(row)
+                assert isinstance(parsed, dict)
+                parsed['document'] = self.parse_doc(row)
+                data.append(parsed)
             self.parse_data(data)
 
         if self.autofix and os.path.isfile(file):

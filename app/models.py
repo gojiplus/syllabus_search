@@ -2,7 +2,7 @@ from . import Base
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Sequence, ForeignKey, Table, \
     Integer, SmallInteger, Text, Date, Enum, Float, String
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 
 __all__ = [
     'Course',
@@ -62,6 +62,7 @@ class Course(Base):
     tas = Column(ARRAY(Text))
     num_sessions = Column(Integer, default=0)
     num_assessments = Column(Integer, default=0)
+    document = Column(TSVECTOR)
     sessions = relationship('Session', back_populates='course')
     assessments = relationship('Assessment', back_populates='course')
     categories = relationship('Category', secondary=course_category,
@@ -85,6 +86,7 @@ class Session(Base):
     instruction_type = Column(String(20))
     topics = Column(ARRAY(Text))
     objectives = Column(ARRAY(Text))
+    document = Column(TSVECTOR)
     course_id = Column(Integer, ForeignKey('courses.id'))
     course = relationship('Course', back_populates='sessions')
 
@@ -100,5 +102,6 @@ class Assessment(Base):
     cumulative = Column(String(20))
     due_date = Column(Date)
     objectives = Column(ARRAY(Text))
+    document = Column(TSVECTOR)
     course_id = Column(Integer, ForeignKey('courses.id'))
     course = relationship('Course', back_populates='assessments')
