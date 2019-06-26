@@ -8,8 +8,8 @@ Rendering application pages.
 
 from copy import deepcopy
 from flask import render_template, request, abort, flash
-from . import app, db, Course
-from .utils import template_exists, get_conf, list_parser
+from . import app
+from .utils import template_exists, get_conf, list_parser, search_courses
 
 GLOBAL_VARS = {
     'navbar': [
@@ -56,21 +56,6 @@ def _render(page, **kwargs):
 
     # Render template
     return render_template(template, **variables)
-
-
-def search_courses():
-    # noinspection PyTypeChecker
-    def parse_row(obj: Course):
-        instructors = ', '.join(i.name for i in obj.instructors)
-        tas = ', '.join(i for i in obj.tas)
-        return [obj.name, obj.year, obj.term, obj.credits, obj.faculty,
-                instructors, tas, obj.num_assessments, obj.num_sessions]
-
-    data = [['Name', 'Year', 'Term', 'Credits', 'Faculty',
-             'Instructors', 'TAs', 'No. Assess.', 'No. Sessions']]
-    for i in db.query(Course).all():
-        data.append(parse_row(i))
-    return data
 
 
 def validate_data(data, terms, years):
@@ -126,8 +111,7 @@ def index():
             if data:
                 kwargs['form_data'] = dict(request.form.items())
                 if validate_data(data, terms, years):
-                    kwargs['course_data'] = search_courses()
-                    flash('Temporarily return all courses data', 'success')
+                    kwargs['course_data'] = search_courses(**data)
             else:
                 flash('Unable to search! You have not filled in the form.', 'failed')
 
