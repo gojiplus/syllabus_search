@@ -1,8 +1,8 @@
 import os, datetime, nltk
-from . import app, db, config, Course, APP_PATH
+from . import app, db, config, Course, Session, Assessment, APP_PATH
 from flask import url_for, request, flash
 from configparser import NoOptionError, NoSectionError
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 __all__ = [
     'getpath',
@@ -134,7 +134,14 @@ def search_courses(**kwargs):
     if keywords:
         keywords = build_keywords(keywords)
         if keywords:
-            conditions += (Course.document.match(keywords),)
+            course_ids = [i[0] for i in {
+                *db.query(Session.course_id).filter(Session.document.match(keywords)).all(),
+                *db.query(Assessment.course_id).filter(Assessment.document.match(keywords)).all()
+            }]
+            if course_ids:
+                conditions += (or_(Course.document.match(keywords), Course.id.in_(course_ids)),)
+            else:
+                conditions += (Course.document.match(keywords),)
 
     try:
         courses = db.query(Course).filter(and_(*conditions)).all()
