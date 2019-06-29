@@ -51,3 +51,8 @@ db = dbconnect(engine)  # type: Session
 
 from . import utils
 from . import views
+from .api import *
+
+api.add_resource(Sessions, '/s/<int:course_id>')
+api.add_resource(Assessments, '/a/<int:course_id>')
+api.add_resource(Outcomes, '/o/<int:course_id>')
