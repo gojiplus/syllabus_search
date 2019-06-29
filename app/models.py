@@ -66,7 +66,7 @@ class Course(Base):
     sessions = relationship('Session', back_populates='course')
     assessments = relationship('Assessment', back_populates='course')
     categories = relationship('Category', secondary=course_category,
-                              back_populates='courses')
+                              back_populates='courses', lazy='joined')
     instructors = relationship('Instructor', secondary=course_instructor,
                                back_populates='courses', lazy='joined')
 

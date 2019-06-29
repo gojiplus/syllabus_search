@@ -97,13 +97,17 @@ def build_keywords(string: str):
 
 def search_courses(**kwargs):
     def parse_row(obj: Course):
-        instructors = ', '.join(i.name for i in obj.instructors)
         tas = ', '.join(i for i in obj.tas)
-        return [obj.name, obj.year, obj.term, obj.credits, obj.faculty,
+        cats = ', '.join(c.name for c in obj.categories)
+        instructors = ', '.join(
+            '{}{}'.format(i.name, ' ({})'.format(', '.join(i.degrees)) if i.degrees else '')
+            for i in obj.instructors
+        )
+        return [obj.name, cats, obj.year, obj.term, obj.credits, obj.faculty,
                 instructors, tas, obj.num_assessments, obj.num_sessions]
 
-    header = ['Name', 'Year', 'Term', 'Credits', 'Faculty',
-              'Instructors', 'TAs', 'No. Assess.', 'No. Sessions']
+    header = ['Name', 'Categories', 'Year', 'Term', 'Credits',
+              'Faculty', 'Instructors', 'TAs', 'No. Assess.', 'No. Sessions']
 
     start_term = kwargs.get('start_term')
     end_term = kwargs.get('end_term')
