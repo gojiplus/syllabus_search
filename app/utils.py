@@ -103,10 +103,10 @@ def search_courses(**kwargs):
             '{}{}'.format(i.name, ' ({})'.format(', '.join(i.degrees)) if i.degrees else '')
             for i in obj.instructors
         )
-        return [obj.name, cats, obj.year, obj.term, obj.credits, obj.faculty,
+        return [obj.id, obj.name, cats, obj.year, obj.term, obj.credits, obj.faculty,
                 instructors, tas, obj.num_assessments, obj.num_sessions]
 
-    header = ['Name', 'Categories', 'Year', 'Term', 'Credits',
+    header = ['ID', 'Name', 'Categories', 'Year', 'Term', 'Credits',
               'Faculty', 'Instructors', 'TAs', 'No. Assess.', 'No. Sessions']
 
     start_term = kwargs.get('start_term')

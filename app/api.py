@@ -27,14 +27,12 @@ class _Base(Resource):
         if res:
             if self.header:
                 res = self.header + res
-            return res, 200
+            return {'data': res}, 200
         return [], 200
 
 
 class Sessions(_Base):
     model = Session
-    header = ['Title', 'Type', 'Date', 'Length', 'Section', 'Location',
-              'Topics', 'Teaching Strategies', 'Guest Teacher']
 
     def parse_object(self, obj: Session):
         return [
@@ -46,7 +44,6 @@ class Sessions(_Base):
 
 class Assessments(_Base):
     model = Assessment
-    header = ['Title', 'Type', 'Format', 'Weight', 'Cumulative', 'Due Date']
 
     def parse_object(self, obj: Assessment):
         return [
@@ -65,5 +62,5 @@ class Outcomes(_Base):
         id_ = kwargs.get('course_id')
         res = super(Outcomes, self).query(id=id_)
         if res and res[0]:
-            return ['Course Outcomes', *res[0]]
+            return [[outcome] for outcome in res[0]]
         return []

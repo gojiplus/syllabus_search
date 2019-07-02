@@ -11,6 +11,11 @@ from flask import render_template, request, abort, flash
 from . import app
 from .utils import template_exists, get_conf, list_parser, search_courses
 
+SESSION_HEADER = ['Title', 'Type', 'Date', 'Length', 'Section', 'Location',
+                  'Topics', 'Teaching Strategies', 'Guest Teacher']
+
+ASSESS_HEADER = ['Title', 'Type', 'Format', 'Weight', 'Cumulative', 'Due Date']
+
 GLOBAL_VARS = {
     'navbar': [
         # (href, caption)
@@ -100,7 +105,8 @@ def index():
     years = list_parser(get_conf('search_form', 'years', fallback=''))
 
     kwargs = {
-        'course_data': None, 'form_data': None, 'terms': terms, 'years': years
+        'course_data': None, 'form_data': None, 'terms': terms, 'years': years,
+        'session_h': SESSION_HEADER, 'assess_h': ASSESS_HEADER
     }
 
     # Method is POST
