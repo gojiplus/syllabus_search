@@ -24,11 +24,9 @@ class _Base(Resource):
     def get(self, course_id):
         assert self.model
         res = self.query(course_id=course_id)
-        if res:
-            if self.header:
-                res = self.header + res
-            return {'data': res}, 200
-        return [], 200
+        if self.header:
+            res = self.header + res
+        return {'data': res}, 200
 
 
 class Sessions(_Base):
