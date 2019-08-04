@@ -9,7 +9,8 @@ Rendering application pages.
 from copy import deepcopy
 from flask import render_template, request, abort, flash
 from . import app
-from .utils import template_exists, get_conf, list_parser, search_courses
+from .utils import template_exists, get_conf, \
+    validate_data, search_courses, TERMS, YEARS
 
 SESSION_HEADER = ['Title', 'Type', 'Date', 'Length', 'Section', 'Location',
                   'Topics', 'Teaching Strategies', 'Guest Teacher']
@@ -63,63 +64,25 @@ def _render(page, **kwargs):
     return render_template(template, **variables)
 
 
-def validate_data(data, terms, years):
-    required = {'start_term', 'end_term', 'start_year', 'end_year'}
-    missing = required - (required & set(data))
-    if missing:
-        flash('Missing required fields: %s' % ', '.join(str(i) for i in missing), 'failed')
-        return False
-
-    t1, t2 = data['start_term'], data['end_term']
-    y1, y2 = int(data['start_year']), int(data['end_year'])
-
-    if t1 not in terms:
-        flash('Unexpected starting term: %s' % t1, 'failed')
-        return False
-    if t2 not in terms:
-        flash('Unexpected ending term: %s' % t2, 'failed')
-        return False
-    if y1 not in years:
-        flash('Unexpected starting year: %d' % y1, 'failed')
-        return False
-    if y2 not in years:
-        flash('Unexpected starting year: %d' % y1, 'failed')
-        return False
-
-    if y1 < y2:
-        return True
-    elif y1 == y2:
-        p1, p2 = terms.index(t1), terms.index(t2)
-        if p1 <= p2:
-            return True
-
-    flash('Expected time range must be sooner to later', 'failed')
-    return False
-
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """Main index page of application. Accepts both GET and POST methods"""
 
-    terms = list_parser(get_conf('search_form', 'terms', fallback=''))
-    years = list_parser(get_conf('search_form', 'years', fallback=''))
-
     kwargs = {
-        'course_data': None, 'form_data': None, 'terms': terms, 'years': years,
+        'terms': TERMS, 'years': YEARS,
+        'course_data': None, 'form_data': None,
         'session_h': SESSION_HEADER, 'assess_h': ASSESS_HEADER
     }
 
     # Method is POST
     if request.method == 'POST':
         data = {k: v for k, v in request.form.items() if v}
-        reset = data.pop('reset', False)
-        if reset is False:
-            if data:
-                kwargs['form_data'] = dict(request.form.items())
-                if validate_data(data, terms, years):
-                    kwargs['course_data'] = search_courses(**data)
-            else:
-                flash('Unable to search! You have not filled in the form.', 'failed')
+        if data:
+            kwargs['form_data'] = dict(request.form.items())
+            if validate_data(data):
+                kwargs['course_data'] = search_courses(**data)
+        else:
+            flash('Unable to search! You have not filled in the form.', 'failed')
 
     # Method is GET or POST with empty data
     return _render('index', **kwargs)

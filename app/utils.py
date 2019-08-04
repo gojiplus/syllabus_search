@@ -9,7 +9,10 @@ __all__ = [
     'template_exists',
     'get_conf',
     'list_parser',
-    'search_courses'
+    'validate_data',
+    'search_courses',
+    'TERMS',
+    'YEARS'
 ]
 
 try:
@@ -84,6 +87,10 @@ def list_parser(string: str):
     return []
 
 
+TERMS = list_parser(get_conf('search_form', 'terms', fallback=''))
+YEARS = list_parser(get_conf('search_form', 'years', fallback=''))
+
+
 def build_keywords(string: str):
     def combine(s):
         return ' & '.join([
@@ -93,6 +100,53 @@ def build_keywords(string: str):
     enclosed = lambda s: '&' in s and len(phrases) > 1
     fmt = lambda s: ('({})' if enclosed(s) else '{}').format(s)
     return ' | '.join([fmt(combine(phrase)) for phrase in phrases if phrase])
+
+
+def validate_data(data):
+    required = set()
+    missing = required - (required & set(data))
+    if missing:
+        flash('Missing required fields: %s' % ', '.join(str(i) for i in missing), 'failed')
+        return False
+
+    t1, t2 = data.get('start_term'), data.get('end_term')
+    y1, y2 = data.get('start_year'), data.get('end_year')
+
+    y1 = int(y1) if y1 else None
+    y2 = int(y2) if y2 else None
+
+    if t1 and t1 not in TERMS:
+        flash('Unexpected starting term: %s' % t1, 'failed')
+        return False
+    if t2 and t2 not in TERMS:
+        flash('Unexpected ending term: %s' % t2, 'failed')
+        return False
+    if y1 and y1 not in YEARS:
+        flash('Unexpected starting year: %d' % y1, 'failed')
+        return False
+    if y2 and y2 not in YEARS:
+        flash('Unexpected starting year: %d' % y1, 'failed')
+        return False
+    if t1 and not y1:
+        flash('Start year is missing', 'failed')
+        return False
+    if y1 and not t1:
+        flash('Start term is missing', 'failed')
+        return False
+    if t2 and not y2:
+        flash('End year is missing', 'failed')
+        return False
+    if y2 and not t2:
+        flash('End term is missing', 'failed')
+        return False
+
+    if y1 and y2:
+        p1, p2 = TERMS.index(t1), TERMS.index(t2)
+        if any([y1 > y2, y1 == y2 and p1 > p2]):
+            flash('End period must come after start period', 'failed')
+            return False
+
+    return True
 
 
 def search_courses(**kwargs):
@@ -115,25 +169,44 @@ def search_courses(**kwargs):
     end_year = kwargs.get('end_year')
     keywords = kwargs.get('keyword')
 
-    conditions = ()
-    if start_term and end_term:
-        if start_term == end_term:
-            conditions += (Course.term == start_term,)
-        else:
-            conditions += (Course.term.in_([start_term, end_term]),)
-    elif start_term or end_term:
-        term = start_term or end_term
-        conditions += (Course.term == term,)
+    if start_year:
+        start_year = int(start_year)
+    if end_year:
+        end_year = int(end_year)
 
+    if start_year and start_year == end_year and start_term == end_term:
+        start_term, end_term = end_term, None
+        start_year, end_year = end_year, None
+
+    conditions = ()
     if start_year and end_year:
+        p1, p2 = TERMS.index(start_term), TERMS.index(end_term)
         if start_year == end_year:
-            conditions += (Course.year == int(start_year),)
-        elif start_year < end_year:
-            conditions += (Course.year.between(int(start_year), int(end_year)),)
+            conditions += (Course.term.in_(TERMS[p1:p2+1]), Course.year == start_year)
+
         else:
-            raise NotImplementedError
-    elif start_year or end_year:
-        conditions += (Course.year == int(start_year or end_year),)
+            periods = (and_(Course.term.in_(TERMS[p1:]), Course.year == start_year),)
+            if start_year + 1 < end_year:
+                if start_year + 1 < end_year - 1:
+                    periods += (Course.year.between(start_year + 1, end_year - 1))
+                else:
+                    periods += (Course.year == start_year + 1)
+            periods += (and_(Course.term.in_(TERMS[:p2+1]), Course.year == end_year),)
+            conditions += (or_(*periods),)
+
+    elif start_year:
+        p1 = TERMS.index(start_term)
+        conditions += (or_(
+            and_(Course.term.in_(TERMS[p1:]), Course.year == start_year),
+            Course.year > start_year
+        ),)
+
+    elif end_year:
+        p2 = TERMS.index(end_term)
+        conditions += (or_(
+            Course.year < end_year,
+            and_(Course.term.in_(TERMS[:p2+1]), Course.year == end_year)
+        ),)
 
     if keywords:
         keywords = build_keywords(keywords)
@@ -148,7 +221,7 @@ def search_courses(**kwargs):
                 conditions += (Course.document.match(keywords),)
 
     try:
-        courses = db.query(Course).filter(and_(*conditions)).all()
+        courses = db.query(Course).filter(*conditions).all()
         if courses:
             flash('Found %d results' % len(courses), 'success')
             return [header, *(parse_row(i) for i in courses)]
