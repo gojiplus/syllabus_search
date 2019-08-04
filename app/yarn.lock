@@ -15,12 +15,12 @@ datatables.net-bs4@^1.10.15, datatables.net-bs4@^1.10.19:
     datatables.net "1.10.19"
     jquery ">=1.7"
 
-datatables.net-dt@^1.10.19:
-  version "1.10.19"
-  resolved "https://registry.yarnpkg.com/datatables.net-dt/-/datatables.net-dt-1.10.19.tgz#fc668e4942ac6e331be2707975d0f33e01afb60f"
-  integrity sha512-joFHYjLYvr9VnC9Fx3e+8jtXnQ/fP/mPFWt9p0NhZ3Zm5N0jlYyWhJQbnLkihOLuDcDFMaGdBQSvmIdTVdgGyw==
+datatables.net-buttons@^1.5.6:
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/datatables.net-buttons/-/datatables.net-buttons-1.5.6.tgz#30305a2ebc6c5e2ce5d32a8ef3649e0d5943d73a"
+  integrity sha512-FlJtjQ8dsr6xeHWETUCtUJEa7ZqKlphFb22+LXZs80LmJqpVbW84BkppwSoKK+F4k8eRr1tYr38dxcCvIIy0rw==
   dependencies:
-    datatables.net "1.10.19"
+    datatables.net "^1.10.15"
     jquery ">=1.7"
 
 datatables.net-select-bs4@^1.3.0:

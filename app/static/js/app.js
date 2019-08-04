@@ -2,12 +2,21 @@ $(document).ready(function() {
     var selected_course = 0;
 
     var course_table = $('#course_table').DataTable({
+        dom: 'Bftp',
         bInfo: false,
         responsive: true,
-        lengthMenu: [5, 10, 25, 50, 100],
+        lengthChange: false,
+        pageLength: 5,
         select: {
             style: 'single'
-        }
+        },
+        buttons: [
+            {
+                extend: 'csv',
+                text: 'Download CSV',
+                filename: 'courses'
+            }
+        ]
     });
 
     function showTable(name) {
@@ -21,12 +30,19 @@ $(document).ready(function() {
         if (table.hasClass('d-none') && selected_course !== 0) {
             table.removeClass('d-none');
             table.DataTable({
+                dom: 'Bftp',
                 bInfo: false,
-                // searching: false,
                 lengthChange: false,
                 pageLength: 5,
                 ajax: url,
-                responsive: true
+                responsive: true,
+                buttons: [
+                    {
+                        extend: 'csv',
+                        text: 'Download CSV',
+                        filename: (name == 'assess') ? 'assessments' : name + 's'
+                    }
+                ]
             });
             if (link.text() === 'show') {
                 link.text('hide');

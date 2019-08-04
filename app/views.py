@@ -28,6 +28,7 @@ GLOBAL_VARS = {
         ('stylesheet', 'text/css', 'vendor/bootstrap/dist/css/bootstrap.min.css'),
         ('stylesheet', 'text/css', 'vendor/datatables.net-bs4/css/dataTables.bootstrap4.min.css'),
         ('stylesheet', 'text/css', 'vendor/datatables.net-select-bs4/css/select.bootstrap4.min.css'),
+        ('stylesheet', 'text/css', 'https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css'),
         ('stylesheet', 'text/css', 'css/style.css')
     ],
     'scripts': [
@@ -36,6 +37,10 @@ GLOBAL_VARS = {
         'vendor/datatables.net/js/jquery.dataTables.min.js',
         'vendor/datatables.net-bs4/js/dataTables.bootstrap4.min.js',
         'vendor/datatables.net-select/js/dataTables.select.min.js',
+        'vendor/datatables.net-buttons/js/dataTables.buttons.min.js',
+        'vendor/datatables.net-buttons/js/buttons.flash.min.js',
+        'vendor/datatables.net-buttons/js/buttons.html5.min.js',
+        'vendor/datatables.net-buttons/js/buttons.print.min.js',
         'js/app.js'
     ]
 }
