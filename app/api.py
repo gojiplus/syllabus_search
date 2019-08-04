@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, request
 from . import app, db, Course, Session, Assessment
 
 __all__ = ['api', 'Sessions', 'Assessments', 'Outcomes']
@@ -15,15 +15,22 @@ class _Base(Resource):
     def parse_object(self, obj):
         """Method for parsing single data row"""
 
-    def query(self, **kwargs):
+    def query(self, course_id, keyword=None):
+        stmt = ()
+        if self.model is Course:
+            stmt += (self.model.id == course_id,)
+        else:
+            stmt += (self.model.course_id == course_id,)
+        if keyword:
+            stmt += (self.model.document.match(keyword),)
         return [
             self.parse_object(obj)
-            for obj in db.query(self.model).filter_by(**kwargs).all()
+            for obj in db.query(self.model).filter(*stmt).all()
         ]
 
     def get(self, course_id):
         assert self.model
-        res = self.query(course_id=course_id)
+        res = self.query(course_id, request.args.get('keyword'))
         if self.header:
             res = self.header + res
         return {'data': res}, 200
@@ -56,9 +63,8 @@ class Outcomes(_Base):
     def parse_object(self, obj: Course):
         return obj.outcomes
 
-    def query(self, **kwargs):
-        id_ = kwargs.get('course_id')
-        res = super(Outcomes, self).query(id=id_)
+    def query(self, course_id, keyword=None):
+        res = super(Outcomes, self).query(course_id)
         if res and res[0]:
             return [[outcome] for outcome in res[0]]
         return []

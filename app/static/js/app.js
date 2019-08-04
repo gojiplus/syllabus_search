@@ -13,14 +13,19 @@ $(document).ready(function() {
     function showTable(name) {
         var table = $('#' + name + '_table');
         var link = $('#' + name + '_btn');
+        var kw = $('#keyword').val();
+        var url = name.charAt(0) + '/' + selected_course;
+        if (kw) {
+            url += '?keyword=' + encodeURIComponent(kw);
+        }
         if (table.hasClass('d-none') && selected_course !== 0) {
             table.removeClass('d-none');
             table.DataTable({
                 bInfo: false,
-                searching: false,
+                // searching: false,
                 lengthChange: false,
                 pageLength: 5,
-                ajax: name.charAt(0) + '/' + selected_course,
+                ajax: url,
                 responsive: true
             });
             if (link.text() === 'show') {
