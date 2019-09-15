@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-<form action="{{ url_for('index') }}" method="post" class="mb-5">
+<form action="{{ url_for('index') }}" method="post" class="mb-5" id="search">
   <div class="form-group row">
     <span class="col-2 col-form-label">Starting</span>
     <div class="col-5" style="padding-right: 5px;">
@@ -71,16 +71,15 @@
     {%- endfor %}
     </tbody>
   </table>
-{%- endif %}
-{%- for name in ('session', 'assess') %}
-  {%- if name == 'session' %}
-    {%- set headers = session_h %}
-    {%- set title = 'Session' %}
-  {%- else  %}
-    {%- set headers = assess_h %}
-    {%- set title = 'Assessment' %}
-  {%- endif %}
-  <div id="{{ name }}_wrap" class="mt-5 d-none">
+  {%- for name in ('session', 'assess') %}
+    {%- if name == 'session' %}
+      {%- set headers = session_h %}
+      {%- set title = 'Session' %}
+    {%- else  %}
+      {%- set headers = assess_h %}
+      {%- set title = 'Assessment' %}
+    {%- endif %}
+  <div id="{{ name }}_wrap" class="mt-5">
     <h6 class="mb-5"><strong>{{ title }} Information Results</strong><a href="" id="{{ name }}_btn" class="ml-3">show</a></h6>
     <table id="{{ name }}_table" class="table table-striped table-bordered d-none">
       <thead>
@@ -94,7 +93,7 @@
       </tbody>
     </table>
   </div>
-{%- endfor %}
+  {%- endfor %}
   <div id="outcome_wrap" class="mt-5 d-none">
     <h6 class="mb-5"><strong>Course Outcomes</strong><a href="" id="outcome_btn" class="ml-3">show</a></h6>
     <table id="outcome_table" class="table table-striped table-bordered d-none">
@@ -107,4 +106,5 @@
       </tbody>
     </table>
   </div>
+{%- endif %}
 {% endblock %}

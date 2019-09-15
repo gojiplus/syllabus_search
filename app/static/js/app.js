@@ -24,10 +24,12 @@ $(document).ready(function() {
         var link = $('#' + name + '_btn');
         var kw = $('#keyword').val();
         var url = name.charAt(0) + '/' + selected_course;
-        if (kw) {
+        if (selected_course === 0) {
+            url += '?' + $('#search').serialize();
+        } else if (kw) {
             url += '?keyword=' + encodeURIComponent(kw);
         }
-        if (table.hasClass('d-none') && selected_course !== 0) {
+        if (table.hasClass('d-none')) {
             table.removeClass('d-none');
             table.DataTable({
                 dom: 'Bftp',
@@ -66,6 +68,22 @@ $(document).ready(function() {
         return false;
     }
 
+    function showWrap(name) {
+        var wrap = $('#' + name + '_wrap');
+        if (wrap.hasClass('d-none')) {
+            wrap.removeClass('d-none');
+        }
+        hideTable(name);
+    }
+
+    function hideWrap(name) {
+        var wrap = $('#' + name + '_wrap');
+        hideTable(name);
+        if (!wrap.hasClass('d-none')) {
+            wrap.addClass('d-none');
+        }
+    }
+
     $('#session_btn').on('click', function (e) {
         e.preventDefault();
         var link = $(this);
@@ -96,40 +114,22 @@ $(document).ready(function() {
         }
     });
 
-    function showWrap(name) {
-        var wrap = $('#' + name + '_wrap');
-        if (wrap.hasClass('d-none')) {
-            wrap.removeClass('d-none');
-        }
-        hideTable(name);
-    }
-
-    function hideWrap(name) {
-        var wrap = $('#' + name + '_wrap');
-        hideTable(name);
-        if (!wrap.hasClass('d-none')) {
-            wrap.addClass('d-none');
-        }
-    }
-
     course_table.on( 'page.dt', function () {
         selected_course = 0;
-        hideWrap('session');
-        hideWrap('assess');
+        hideTable('session');
+        hideTable('assess');
         hideWrap('outcome');
     });
 
     course_table.on( 'click', 'tr', function () {
         var row = $(this);
+        hideTable('session');
+        hideTable('assess');
         if (row.hasClass('selected')) {
             selected_course = 0;
-            hideWrap('session');
-            hideWrap('assess');
             hideWrap('outcome');
         } else {
             selected_course = row.data('id');
-            showWrap('session');
-            showWrap('assess');
             showWrap('outcome');
         }
     });
