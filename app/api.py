@@ -1,6 +1,7 @@
-from abc import abstractmethod
 from flask_restful import Api, Resource, request
-from . import app, db, Course, Session, Assessment
+from . import app, db
+from .parser import get_parser
+from .models import Course, Session, Assessment
 
 __all__ = ['api', 'Sessions', 'Assessments', 'Outcomes']
 
@@ -9,11 +10,7 @@ api = Api(app)
 
 class _Base(Resource):
     model = None
-    header = None
-
-    @abstractmethod
-    def parse_object(self, obj):
-        """Method for parsing single data row"""
+    parser = None
 
     def query(self, course_id, keyword=None):
         stmt = ()
@@ -29,42 +26,22 @@ class _Base(Resource):
         ]
 
     def get(self, course_id):
-        assert self.model
+        assert self.model is not None
+        assert self.parser is not None
         res = self.query(course_id, request.args.get('keyword'))
-        if self.header:
-            res = self.header + res
-        return {'data': res}, 200
+        return {'data': self.parser(res)}, 200
 
 
 class Sessions(_Base):
     model = Session
-
-    def parse_object(self, obj: Session):
-        return [
-            obj.title or '', obj.type or '', str(obj.date or ''), obj.length or '',
-            obj.section or '', obj.location or '', ', '.join(obj.topics),
-            ', '.join(obj.teaching_strategies), ', '.join(obj.guest_teachers)
-        ]
+    parser = get_parser(model)
 
 
 class Assessments(_Base):
     model = Assessment
-
-    def parse_object(self, obj: Assessment):
-        return [
-            obj.title or '', obj.type or '', obj.format or '',
-            obj.weight or '', obj.cumulative or '', str(obj.due_date or '')
-        ]
+    parser = get_parser(model)
 
 
 class Outcomes(_Base):
     model = Course
-
-    def parse_object(self, obj: Course):
-        return obj.outcomes
-
-    def query(self, course_id, keyword=None):
-        res = super(Outcomes, self).query(course_id)
-        if res and res[0]:
-            return [[outcome] for outcome in res[0]]
-        return []
+    parser = lambda res: [[i] for i in res[0]] if res and res[0] else []
