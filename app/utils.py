@@ -10,7 +10,7 @@ __all__ = [
     'get_conf',
     'list_parser',
     'validate_data',
-    'search_courses',
+    'search',
     'TERMS',
     'YEARS'
 ]
@@ -149,26 +149,16 @@ def validate_data(data):
     return True
 
 
-def search_courses(**kwargs):
-    def parse_row(obj: Course):
-        tas = ', '.join(i for i in obj.tas)
-        cats = ', '.join(c.name for c in obj.categories)
-        instructors = ', '.join(
-            '{}{}'.format(i.name, ' ({})'.format(', '.join(i.degrees)) if i.degrees else '')
-            for i in obj.instructors
-        )
-        return [obj.id, obj.name, cats, obj.year, obj.term, obj.credits, obj.faculty,
-                instructors, tas, obj.num_assessments, obj.num_sessions]
-
-    header = ['ID', 'Name', 'Categories', 'Year', 'Term', 'Credits',
-              'Faculty', 'Instructors', 'TAs', 'No. Assess.', 'No. Sessions']
-
+def build_query(**kwargs):
+    course_id = kwargs.get('course_id')
     start_term = kwargs.get('start_term')
     end_term = kwargs.get('end_term')
     start_year = kwargs.get('start_year')
     end_year = kwargs.get('end_year')
-    keywords = kwargs.get('keyword')
+    keywords = kwargs.get('keyword', kwargs.get('keywords'))
 
+    if course_id:
+        course_id = int(course_id)
     if start_year:
         start_year = int(start_year)
     if end_year:
@@ -179,19 +169,35 @@ def search_courses(**kwargs):
         start_year, end_year = end_year, None
 
     conditions = ()
+
+    if course_id:
+        conditions += (Course.id == course_id,)
+
     if start_year and end_year:
         p1, p2 = TERMS.index(start_term), TERMS.index(end_term)
         if start_year == end_year:
-            conditions += (Course.term.in_(TERMS[p1:p2+1]), Course.year == start_year)
+            conditions += (
+                Course.term.in_(TERMS[p1:p2 + 1]),
+                Course.year == start_year
+            )
 
         else:
-            periods = (and_(Course.term.in_(TERMS[p1:]), Course.year == start_year),)
+            periods = (and_(
+                Course.term.in_(TERMS[p1:]),
+                Course.year == start_year
+            ),)
+
             if start_year + 1 < end_year:
                 if start_year + 1 < end_year - 1:
-                    periods += (Course.year.between(start_year + 1, end_year - 1))
+                    periods += (Course.year.between(start_year + 1, end_year - 1),)
                 else:
-                    periods += (Course.year == start_year + 1)
-            periods += (and_(Course.term.in_(TERMS[:p2+1]), Course.year == end_year),)
+                    periods += (Course.year == start_year + 1,)
+
+            periods += (and_(
+                Course.term.in_(TERMS[:p2 + 1]),
+                Course.year == end_year
+            ),)
+
             conditions += (or_(*periods),)
 
     elif start_year:
@@ -205,28 +211,29 @@ def search_courses(**kwargs):
         p2 = TERMS.index(end_term)
         conditions += (or_(
             Course.year < end_year,
-            and_(Course.term.in_(TERMS[:p2+1]), Course.year == end_year)
+            and_(Course.term.in_(TERMS[:p2 + 1]), Course.year == end_year)
         ),)
 
     if keywords:
         keywords = build_keywords(keywords)
         if keywords:
-            course_ids = [i[0] for i in {
-                *db.query(Session.course_id).filter(Session.document.match(keywords)).all(),
-                *db.query(Assessment.course_id).filter(Assessment.document.match(keywords)).all()
-            }]
-            if course_ids:
-                conditions += (or_(Course.document.match(keywords), Course.id.in_(course_ids)),)
-            else:
-                conditions += (Course.document.match(keywords),)
+            conditions += (or_(
+                Course.document.match(keywords),
+                Session.document.match(keywords),
+                Assessment.document.match(keywords)
+            ),)
+
+    return conditions
+
+
+def search(entity, **kwargs):
+    entities = {Course, Session, Assessment}
+    assert entity in entities, entity
+
+    table = db.query(entity).join(Course.sessions, Course.assessments)
+    conditions = build_query(**kwargs)
 
     try:
-        courses = db.query(Course).filter(*conditions).all()
-        if courses:
-            flash('Found %d results' % len(courses), 'success')
-            return [header, *(parse_row(i) for i in courses)]
+        return table.filter(*conditions).all()
     except:
-        pass
-
-    flash('No result found', 'warning')
-    return None
+        return None
