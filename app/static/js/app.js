@@ -2,7 +2,7 @@ $(document).ready(function() {
     var selected_course = 0;
 
     var course_table = $('#course_table').DataTable({
-        dom: 'Bftpl',
+        dom: 'Bftp',
         bInfo: false,
         responsive: true,
         lengthChange: false,
