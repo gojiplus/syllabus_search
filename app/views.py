@@ -8,14 +8,10 @@ Rendering application pages.
 
 from copy import deepcopy
 from flask import render_template, request, abort, flash
-from . import app
+from . import app, Course, Session, Assessment
+from .parser import get_parser, get_header
 from .utils import template_exists, get_conf, \
-    validate_data, search_courses, TERMS, YEARS
-
-SESSION_HEADER = ['Title', 'Type', 'Date', 'Length', 'Section', 'Location',
-                  'Topics', 'Teaching Strategies', 'Guest Teacher']
-
-ASSESS_HEADER = ['Title', 'Type', 'Format', 'Weight', 'Cumulative', 'Due Date']
+    validate_data, search, TERMS, YEARS
 
 GLOBAL_VARS = {
     'navbar': [
@@ -76,7 +72,7 @@ def index():
     kwargs = {
         'terms': TERMS, 'years': YEARS,
         'course_data': None, 'form_data': None,
-        'session_h': SESSION_HEADER, 'assess_h': ASSESS_HEADER
+        'session_h': get_header(Session), 'assess_h': get_header(Assessment)
     }
 
     # Method is POST
@@ -85,7 +81,13 @@ def index():
         if data:
             kwargs['form_data'] = dict(request.form.items())
             if validate_data(data):
-                kwargs['course_data'] = search_courses(**data)
+                found = search(Course, **data)
+                if found:
+                    flash('Found %d courses' % len(found), 'success')
+                    parse = get_parser(Course, with_header=True)
+                    kwargs['course_data'] = parse(found)
+                else:
+                    flash('No result found', 'warning')
         else:
             flash('Unable to search! You have not filled in the form.', 'failed')
 

@@ -2,7 +2,7 @@ $(document).ready(function() {
     var selected_course = 0;
 
     var course_table = $('#course_table').DataTable({
-        dom: 'Bftp',
+        dom: 'Bftpl',
         bInfo: false,
         responsive: true,
         lengthChange: false,
@@ -118,19 +118,18 @@ $(document).ready(function() {
         selected_course = 0;
         hideTable('session');
         hideTable('assess');
-        hideWrap('outcome');
+        hideTable('outcome');
     });
 
     course_table.on( 'click', 'tr', function () {
         var row = $(this);
         hideTable('session');
         hideTable('assess');
+        hideTable('outcome');
         if (row.hasClass('selected')) {
             selected_course = 0;
-            hideWrap('outcome');
         } else {
             selected_course = row.data('id');
-            showWrap('outcome');
         }
     });
 });
