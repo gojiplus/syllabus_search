@@ -11,12 +11,12 @@ from flask import Flask
 from urllib.parse import quote_plus
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session as DbSession
 from sqlalchemy.ext.declarative import declarative_base
 from configparser import ConfigParser
 
 
-def dbconnect(engine=None) -> Session:
+def dbconnect(engine=None) -> DbSession:
     engine = engine or create_engine(__db_uri__,
                                      echo=config.getboolean('postgresql', 'debug'))
     session_factory = sessionmaker(bind=engine)
@@ -47,7 +47,7 @@ Base = declarative_base()
 from .models import *
 
 Base.metadata.create_all(bind=engine)
-db = dbconnect(engine)  # type: Session
+db = dbconnect(engine)  # type: DbSession
 
 from . import utils
 from . import views
