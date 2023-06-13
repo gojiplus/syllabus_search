@@ -27,9 +27,3 @@ Here's the workflow:
 5. They can also see all the sessions and assessments related to the final filtered table from #3. The sessions and assessments will come out as separate tables on the same page. Both of these tables will support #2, #3, and #4.
 	* Table of session/assessments results should have sort and filter functionality for "Course name", "Type", "Date", "Length", "Course Instructor", "Lecturer", "Teaching Strategies", and "Delivery Mode" columns
 
-## Deliverables
-
-* Deployed application without errors
-* Documented scripts in clean style
-* A readme that lays out how the code is organized
-* A config file that has details of the database, etc.
